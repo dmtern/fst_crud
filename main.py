@@ -57,7 +57,7 @@ def task_orm_to_orm(task_orm: TaskORM) -> Task :
 
 
 @app.get("/tasks", response_model=list[Task], status_code=status.HTTP_200_OK)
-def get_task(db: Session = Depends(get_db)) -> Task:
+def get_task(db: Session = Depends(get_db)) -> list[Task]:
     tasks_from_db = db.scalars(select(TaskORM)).all()
     return [task_orm_to_orm(task) for task in tasks_from_db]
 
@@ -95,6 +95,9 @@ def delete_task(task_id: str, db: Session = Depends(get_db)) -> None:
     db.delete(task_to_delete)
     db.commit()
 
+class Category(BaseModel):
+    id: str
+    name: str
 
 class CategoryORM(Base):
     __tablename__ = "categories"
@@ -103,9 +106,7 @@ class CategoryORM(Base):
 def cat_orm_to_orm(cat_orm: CategoryORM) -> Category:
     return Category(id = cat_orm.id, name = cat_orm.title)
 
-class Category(BaseModel):
-    id: str
-    name: str
+
 
 
 
@@ -116,7 +117,7 @@ class CategoryUpdate(BaseModel):
     name: str
 
 @app.get("/categories", response_model=list[Category])
-def get_categories(db: Session = Depends(get_db)) -> Category:
+def get_categories(db: Session = Depends(get_db)) -> list[Category]:
     cats_from_db = db.scalars(select(CategoryORM)).all()
     return [cat_orm_to_orm(cat) for cat in cats_from_db]
 
